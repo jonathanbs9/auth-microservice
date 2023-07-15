@@ -8,27 +8,35 @@ import (
 	"time"
 )
 
-type Credential struct {
-	ID           CredentialID `json:"id"`
-	Name         string       `json:"name"`
-	PasswordHash string       `json:"-"`
-	AuthToken    AuthToken    `json:"-"`
+type Admin struct {
+	ID           AdminID   `json:"id"`
+	FirstName    string    `json:"first_name"`
+	Lastname     string    `json:"last_name"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"-"`
+	AuthToken    AuthToken `json:"-"`
 }
 
-func NewCredential(params SaveParams) (Credential, error) {
+func NewAdmin(params SaveParams) (Admin, error) {
 	if err := validate(params); err != nil {
-		return Credential{}, err
+		return Admin{}, err
 	}
 
-	return Credential{
-		ID:   params.ID,
-		Name: params.Name,
+	return Admin{
+		ID:        params.ID,
+		FirstName: params.FirstName,
+		Lastname:  params.LastName,
+		Email:     params.Email,
 	}, nil
 }
 
 func validate(params SaveParams) error {
-	if params.Name == "" {
-		return fmt.Errorf("name is required")
+	if params.FirstName == "" {
+		return fmt.Errorf("First name is required")
+	}
+
+	if params.LastName == "" {
+		return fmt.Errorf("Last name is required")
 	}
 
 	if params.ID == 0 {
@@ -43,7 +51,7 @@ func validate(params SaveParams) error {
 	return nil
 }
 
-func (a *Credential) HashPassword(hasher Hasher, password string) error {
+func (a *Admin) HashPassword(hasher Hasher, password string) error {
 	hash, err := hasher.Hash(password)
 	if err != nil {
 		return fmt.Errorf("hash password failed %v", err)
@@ -53,7 +61,7 @@ func (a *Credential) HashPassword(hasher Hasher, password string) error {
 	return nil
 }
 
-func (a *Credential) GenerateAuthToken() error {
+func (a *Admin) GenerateAuthToken() error {
 	h := sha256.New()
 	if _, err := h.Write([]byte(fmt.Sprintf("%d-%s", time.Now().Unix(), randString()))); err != nil {
 		return fmt.Errorf("sha256 write for token id failed %v", err)
@@ -66,11 +74,11 @@ func (a *Credential) GenerateAuthToken() error {
 	return nil
 }
 
-func (a *Credential) AuthTokenExpired() bool {
+func (a *Admin) AuthTokenExpired() bool {
 	return a.AuthToken.ExpiresAt.Before(time.Now())
 }
 
-func (a *Credential) ExpiredAuthToken() {
+func (a *Admin) ExpiredAuthToken() {
 	a.AuthToken = AuthToken{
 		ID:        "-",
 		ExpiresAt: time.Now().Add(-(time.Hour * 24))}

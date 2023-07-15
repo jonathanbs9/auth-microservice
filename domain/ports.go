@@ -2,10 +2,10 @@ package domain
 
 import "context"
 
-type CredentialService interface {
-	SaveCredential(context.Context, SaveParams) error
-	ListCredentials(context.Context) ([]Credential, error)
-	RemoveCredential(context.Context, CredentialID) error
+type AdminService interface {
+	SaveAdmin(context.Context, SaveParams) error
+	ListAdmins(context.Context) ([]Admin, error)
+	RemoveAdmin(context.Context, AdminID) error
 }
 
 type AuthService interface {
@@ -15,12 +15,12 @@ type AuthService interface {
 }
 
 type Storage interface {
-	Save(context.Context, Credential) error
-	FindAll(context.Context) ([]Credential, error)
-	FindByID(context.Context, CredentialID) (Credential, error)
-	FindByName(context.Context, string) (Credential, error)
-	FindByAuthTokenID(context.Context, AuthTokenID) (Credential, error)
-	DeleteByID(context.Context, CredentialID) error
+	Save(context.Context, Admin) error
+	FindAll(context.Context) ([]Admin, error)
+	FindByID(context.Context, AdminID) (Admin, error)
+	FindByName(context.Context, string) (Admin, error)
+	FindByAuthTokenID(context.Context, AuthTokenID) (Admin, error)
+	DeleteByID(context.Context, AdminID) error
 }
 
 type Hasher interface {

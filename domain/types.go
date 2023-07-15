@@ -2,7 +2,7 @@ package domain
 
 import "time"
 
-type CredentialID uint
+type AdminID uint
 type AuthTokenID string
 type AuthToken struct {
 	ID        AuthTokenID
@@ -15,7 +15,9 @@ type AuthParams struct {
 }
 
 type SaveParams struct {
-	ID       CredentialID `json:"id"`
-	Name     string       `json:"name"`
-	Password string       `json:"password"`
+	ID        AdminID `json:"id"`
+	FirstName string  `json:"first_name"`
+	LastName  string  `json:"last_name"`
+	Email     string  `json:"email"`
+	Password  string  `json:"password"`
 }
