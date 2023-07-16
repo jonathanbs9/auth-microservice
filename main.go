@@ -1,9 +1,11 @@
 package main
 
 import (
+	"auth-microservice/config"
 	"auth-microservice/domain"
 	"auth-microservice/infra"
 	"auth-microservice/rest"
+
 	"context"
 	"fmt"
 	"log"
@@ -14,7 +16,7 @@ import (
 )
 
 func main() {
-	cf := loadConfig()
+	cf := config.LoadConfig()
 	db := mustConnectDB(cf)
 
 	ps, err := infra.NewPostgresStorage(db)
@@ -25,11 +27,11 @@ func main() {
 	bh := infra.BcryptHasher{}
 
 	authSrv := domain.NewAuthService(ps, bh)
-	credentialSrv := domain.NewAdminService(ps, bh, authSrv)
+	adminSrv := domain.NewAdminService(ps, bh, authSrv)
 
-	mustCreateDefaultCredential(cf, ps, credentialSrv)
+	mustCreateDefaultAdmin(cf, ps, adminSrv)
 
-	credentialH := rest.NewAdminHandler(credentialSrv)
+	adminH := rest.NewAdminHandler(adminSrv)
 	authH := rest.NewAuthHandler(authSrv)
 	authM := rest.NewAuthMiddleware(authSrv)
 
@@ -43,14 +45,14 @@ func main() {
 	dash := api.Group("/dashboard")
 	dash.Use(authM)
 
-	dash.GET("/admins", credentialH.HandleGetAdmins)
-	dash.POST("/admins", credentialH.HandleSaveAdmin)
-	dash.DELETE("/admins/:id", credentialH.HandleDeleteAdmin)
+	dash.GET("/admins", adminH.HandleGetAdmins)
+	dash.POST("/admins", adminH.HandleSaveAdmin)
+	dash.DELETE("/admins/:id", adminH.HandleDeleteAdmin)
 
 	e.Logger.Fatal(e.Start(":9876"))
 }
 
-func mustConnectDB(cf *config) *gorm.DB {
+func mustConnectDB(cf *config.Config) *gorm.DB {
 	db, err := gorm.Open(postgres.Open(fmt.Sprintf(
 		`host=%s
 		 user=%s
@@ -73,9 +75,10 @@ func mustConnectDB(cf *config) *gorm.DB {
 	return db
 }
 
-func mustCreateDefaultCredential(cf *config, s domain.Storage, as domain.AdminService) {
+func mustCreateDefaultAdmin(cf *config.Config, s domain.Storage, as domain.AdminService) {
 	ctx := context.Background()
-	_, err := s.FindByName(ctx, cf.DefaultAdminEmail)
+	//_, err := s.FindByName(ctx, cf.DefaultAdminEmail)
+	_, err := s.FindByEmail(ctx, cf.DefaultAdminEmail)
 	if err == nil {
 		log.Println("Skipping default core creation")
 		return
@@ -85,7 +88,7 @@ func mustCreateDefaultCredential(cf *config, s domain.Storage, as domain.AdminSe
 		FirstName: cf.DefaultAdminFirstName,
 		LastName:  cf.DefaultAdminLastName,
 		Email:     cf.DefaultAdminEmail,
-		Password:  cf.DefaultCredentialPassword,
+		Password:  cf.DefaultAdminPassword,
 	}); err != nil {
 		log.Fatalf("Failed to create default credential: %v", err)
 	} else {

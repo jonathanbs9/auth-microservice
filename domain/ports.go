@@ -19,6 +19,7 @@ type Storage interface {
 	FindAll(context.Context) ([]Admin, error)
 	FindByID(context.Context, AdminID) (Admin, error)
 	FindByName(context.Context, string) (Admin, error)
+	FindByEmail(context.Context, string) (Admin, error)
 	FindByAuthTokenID(context.Context, AuthTokenID) (Admin, error)
 	DeleteByID(context.Context, AdminID) error
 }

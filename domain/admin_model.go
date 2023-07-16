@@ -32,11 +32,11 @@ func NewAdmin(params SaveParams) (Admin, error) {
 
 func validate(params SaveParams) error {
 	if params.FirstName == "" {
-		return fmt.Errorf("First name is required")
+		return fmt.Errorf("first name is required")
 	}
 
 	if params.LastName == "" {
-		return fmt.Errorf("Last name is required")
+		return fmt.Errorf("last name is required")
 	}
 
 	if params.ID == 0 {

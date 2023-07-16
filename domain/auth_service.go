@@ -16,10 +16,10 @@ func NewAuthService(s Storage, h Hasher) AuthService {
 }
 
 func (s authService) Authenticate(ctx context.Context, r AuthParams) (AuthTokenID, error) {
-	a, err := s.storage.FindByName(ctx, r.Name)
+	a, err := s.storage.FindByEmail(ctx, r.Email)
 	if err != nil {
-		log.Printf("error: find credential by name %v\n", err)
-		return "", fmt.Errorf("find credential by name failed")
+		log.Printf("error: Find admin by email %v\n", err)
+		return "", fmt.Errorf("find Admin by email failed")
 	}
 
 	if !s.hasher.Compare(r.Password, a.PasswordHash) {
@@ -29,12 +29,12 @@ func (s authService) Authenticate(ctx context.Context, r AuthParams) (AuthTokenI
 
 	if err = a.GenerateAuthToken(); err != nil {
 		log.Printf("error: generate auth token %v\n", err)
-		return "", fmt.Errorf("generrate auth token failed")
+		return "", fmt.Errorf("generate auth token failed")
 	}
 
 	if err = s.storage.Save(ctx, a); err != nil {
-		log.Printf("error: save credential %v\n", err)
-		return "", fmt.Errorf("save credential failed")
+		log.Printf("error: save admin %v\n", err)
+		return "", fmt.Errorf("save admin failed")
 	}
 
 	return a.AuthToken.ID, nil
@@ -47,12 +47,12 @@ func (s authService) Validate(ctx context.Context, id AuthTokenID) error {
 
 	a, err := s.storage.FindByAuthTokenID(ctx, id)
 	if err != nil {
-		log.Printf("error: find credential  by token id %v\n", err)
-		return fmt.Errorf("find credential by token ID failed")
+		log.Printf("error: find admin by token id %v\n", err)
+		return fmt.Errorf("find admin by token ID failed")
 	}
 
 	if a.AuthTokenExpired() {
-		return fmt.Errorf("token expired!")
+		return fmt.Errorf("token expired ")
 	}
 
 	return nil

@@ -28,7 +28,11 @@ func (h AdminHandler) HandleSaveAdmin(c echo.Context) error {
 	var r domain.SaveParams
 
 	if err := c.Bind(&r); err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{"Error saving Admin:": err.Error()})
+		return c.JSON(http.StatusBadRequest, echo.Map{"error:": err.Error()})
+	}
+
+	if err := h.service.SaveAdmin(c.Request().Context(), r); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error_message": err.Error()})
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"message": "Admin saved!"})

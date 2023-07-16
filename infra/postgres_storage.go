@@ -13,7 +13,6 @@ type postgresStorage struct {
 
 type admin struct {
 	gorm.Model
-	ID        uint
 	FirstName string
 	LastName  string
 	Email     string `gorm:"unique"`
@@ -26,6 +25,7 @@ func toAdmin(a *admin) domain.Admin {
 		ID:           domain.AdminID(a.ID),
 		FirstName:    a.FirstName,
 		Lastname:     a.LastName,
+		Email:        a.Email,
 		PasswordHash: a.Password,
 		AuthToken:    a.AuthToken,
 	}
@@ -35,6 +35,7 @@ func fromAdmin(a domain.Admin) *admin {
 	return &admin{
 		FirstName: a.FirstName,
 		LastName:  a.Lastname,
+		Email:     a.Email,
 		Password:  a.PasswordHash,
 		AuthToken: a.AuthToken,
 	}
@@ -88,7 +89,7 @@ func (s postgresStorage) FindByID(ctx context.Context, id domain.AdminID) (domai
 func (s postgresStorage) FindByName(ctx context.Context, name string) (domain.Admin, error) {
 	var row admin
 
-	tx := s.WithContext(ctx).First(&row, "name = ?", name)
+	tx := s.WithContext(ctx).First(&row, "first_name = ?", name)
 	if tx.Error != nil {
 		return toAdmin(&row), tx.Error
 	}
